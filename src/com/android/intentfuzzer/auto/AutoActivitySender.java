@@ -29,7 +29,11 @@ public class AutoActivitySender implements AutoSender<Intent> {
 		mMainHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				mActivityContext.startActivityForResult(fuzzIntent, Constants.REQUEST_CODE_ACTIIVTY, null);
+				try {
+					mActivityContext.startActivityForResult(fuzzIntent, Constants.REQUEST_CODE_ACTIIVTY, null);
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
 			}
 		});
 		
@@ -39,7 +43,11 @@ public class AutoActivitySender implements AutoSender<Intent> {
 				mMainHandler.post(new Runnable() {
 					@Override
 					public void run() {
-						mActivityContext.finishActivity(Constants.REQUEST_CODE_ACTIIVTY);
+						try {
+							mActivityContext.finishActivity(Constants.REQUEST_CODE_ACTIIVTY);
+						} catch(Exception e) {
+							e.printStackTrace();
+						}
 					}
 				});
 			}

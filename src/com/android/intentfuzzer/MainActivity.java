@@ -1,5 +1,7 @@
 package com.android.intentfuzzer;
 
+import com.android.intentfuzzer.auto.AutoTestService;
+import com.android.intentfuzzer.auto.BaseAccessibilityService;
 import com.android.intentfuzzer.util.Utils;
 
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -22,7 +25,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-
+		
 		gridView = (GridView) findViewById(R.id.gridview);
 		gridView.setSelector(new ColorDrawable(Color.TRANSPARENT));
 		gridView.setAdapter(new MainMenuAdapter(this));
@@ -51,14 +54,22 @@ public class MainActivity extends Activity {
 				}
 
 				if (position == 3) {
-					Dialog dialog = new Dialog(MainActivity.this,
-							R.style.dialog);
-					dialog.setContentView(R.layout.dialog);
-					dialog.show();
+					if (BaseAccessibilityService.getInstance().
+							checkAccessibilityEnabled(getPackageName() + "/" + AutoTestService.class.getCanonicalName())) {
+						Dialog dialog = new Dialog(MainActivity.this,
+								R.style.dialog);
+						dialog.setContentView(R.layout.dialog);
+						dialog.show();
+					} else {
+						Toast.makeText(MainActivity.this, "Please enable accessibility for auto test",
+								Toast.LENGTH_SHORT).show();
+						BaseAccessibilityService.getInstance().goAccess();
+					}
 				}
 
 			}
 		});
+		
 	}
 
 	@Override

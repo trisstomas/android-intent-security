@@ -7,8 +7,11 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 public class Utils {
+	
+	private static final String TAG = "IntentFuzzer";
 
 	public static int ALL_APPS = 0;
 	public static int SYSTEM_APPS = 1;
@@ -25,6 +28,10 @@ public class Utils {
 
 	public static final String PKGINFO_KEY = "pkginfo";
 	public static final String APPTYPE_KEY = "apptype";
+	
+	public static void d(Class clazz, String msg) {
+		Log.d(TAG, clazz.getSimpleName() + ":" + msg);
+	}
 
 	public static List<AppInfo> getPackageInfo(Context context, int type) {
 		List<AppInfo> pkgInfoList = new ArrayList<AppInfo>();
