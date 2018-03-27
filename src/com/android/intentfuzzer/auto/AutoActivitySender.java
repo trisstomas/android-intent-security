@@ -13,14 +13,11 @@ public class AutoActivitySender implements AutoSender<Intent> {
 	
 	private Handler mMainHandler;
 	
-	private Handler mWorkHandler;
-	
 	private static final int DELAY_ACTIIVTY_FINISH = 1000;
 	
-	public AutoActivitySender(Context context, Handler mainHandler, Handler workHandler) {
+	public AutoActivitySender(Context context, Handler mainHandler) {
 		this.mActivityContext = (Activity) context;
 		this.mMainHandler = mainHandler;
-		this.mWorkHandler = workHandler;
 	}
 	
 
@@ -37,19 +34,14 @@ public class AutoActivitySender implements AutoSender<Intent> {
 			}
 		});
 		
-		mWorkHandler.postDelayed(new Runnable() {
+		mMainHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				mMainHandler.post(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							mActivityContext.finishActivity(Constants.REQUEST_CODE_ACTIIVTY);
-						} catch(Exception e) {
-							e.printStackTrace();
-						}
-					}
-				});
+				try {
+					mActivityContext.finishActivity(Constants.REQUEST_CODE_ACTIIVTY);
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}, DELAY_ACTIIVTY_FINISH);
 		

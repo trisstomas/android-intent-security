@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import com.android.intentfuzzer.auto.AutoManager;
+import com.android.intentfuzzer.auto.AutoTestManager;
 import com.android.intentfuzzer.util.SerializableTest;
 import com.android.intentfuzzer.util.Utils;
 
@@ -53,8 +53,6 @@ public class FuzzerActivity extends Activity {
 	private static Map<Integer, String> ipcTypesToNames = new TreeMap<Integer, String>();
 	private static Map<String, Integer> ipcNamesToTypes = new HashMap<String, Integer>();
 
-	private AutoManager mAutoManager;
-	
 	private Handler mMainHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
@@ -106,8 +104,6 @@ public class FuzzerActivity extends Activity {
 		for (String name : ipcTypesToNames.values())
 			cmpTypes.add(name);
 		currentType = cmpTypes.get(0);
-
-		mAutoManager = new AutoManager(FuzzerActivity.this);
 
 		initView();
 		initTypeSpinner();
@@ -317,7 +313,7 @@ public class FuzzerActivity extends Activity {
 		try {
 			switch (ipcNamesToTypes.get(type)) {
 			case Utils.ACTIVITIES:
-				mAutoManager.send(AutoManager.SEND_TYPE_ACTIVITY, intent);
+				AutoTestManager.getInstance().send(AutoTestManager.SEND_TYPE_ACTIVITY, intent);
 				return true;
 			case Utils.RECEIVERS:
 				sendBroadcast(intent);

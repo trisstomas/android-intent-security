@@ -71,12 +71,12 @@ public class MainMenuAdapter extends BaseAdapter {
 	}
 
 	private Integer[] mThumbIds = { R.drawable.allapps, R.drawable.system,
-			R.drawable.application, R.drawable.about,
+			R.drawable.application, R.drawable.about, R.drawable.system
 
 	};
 
 	private String[] menuLabels = { "AllApps", "SystemApps", "NonSystemApps",
-			"About"
+			"About", "Test All"
 
 	};
 }

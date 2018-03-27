@@ -1,38 +1,58 @@
 package com.android.intentfuzzer.auto;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.android.intentfuzzer.componentquery.ComponentQuery;
+import com.android.intentfuzzer.componentquery.DullComponentQuery;
 import com.android.intentfuzzer.util.Utils;
 
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+import android.widget.Toast;
 
-public class AutoTestService extends BaseAccessibilityService {
-
-	@Override
-	public void onAccessibilityEvent(AccessibilityEvent event) {
-		if (event == null) {
-			return;
-		}
-		
-		// 当测试 APP 中如果应用发生了异常 Crash，那么系统将会弹出一个 AppErrorDialog，这时需要自动点击 OK 键取消
-		dismissAppErrorDialogIfExists(event);
-		
-		Utils.d(AutoTestService.class, event.toString());
-	}
+public class AutoTestService extends Service {
+	
+	private static final String TAG = AutoTestService.class.getSimpleName();
+	
+	public static AtomicBoolean sAutoTestStarted = new AtomicBoolean(false);
+	
+	private ComponentQuery mComponentQuery;
 
 	@Override
-	public void onInterrupt() {
-		
+	public IBinder onBind(Intent intent) {
+		return null;
 	}
 	
-	private void dismissAppErrorDialogIfExists(AccessibilityEvent event) {
-		if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
-				&& event.getPackageName().equals("android")) {
-			AccessibilityNodeInfo nodeInfo = findViewByText("OK", true);
-            if (nodeInfo != null) {
-            	Utils.d(AutoTestService.class, "dismiss AppErrorDialog");
-                performViewClick(nodeInfo);
-            }
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		
+		mComponentQuery = new DullComponentQuery(this);
+	}
+	
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (sAutoTestStarted.get()) {
+			Toast.makeText(this, "AutoTest have been launched..", Toast.LENGTH_SHORT).show();
+			return START_NOT_STICKY;
 		}
+		
+		sAutoTestStarted.set(true);
+		Toast.makeText(this, "AutoTest launched..", Toast.LENGTH_SHORT).show();
+		Utils.d(AutoTestService.class, "AutoTest launched..");
+		
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				List queryResultList = mComponentQuery.query(ComponentQuery.TYPE_ACTIVITY);
+				AutoTestManager.getInstance().batchSend(queryResultList);
+				sAutoTestStarted.set(false);
+			}
+		}).start();
+		
+		return START_NOT_STICKY;
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.android.intentfuzzer;
 
+import com.android.intentfuzzer.auto.AutoDismissService;
+import com.android.intentfuzzer.auto.AutoTestManager;
 import com.android.intentfuzzer.auto.AutoTestService;
 import com.android.intentfuzzer.auto.BaseAccessibilityService;
 import com.android.intentfuzzer.util.Utils;
@@ -25,6 +27,8 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		
+		AutoTestManager.getInstance().init(this);
 		
 		gridView = (GridView) findViewById(R.id.gridview);
 		gridView.setSelector(new ColorDrawable(Color.TRANSPARENT));
@@ -55,7 +59,7 @@ public class MainActivity extends Activity {
 
 				if (position == 3) {
 					if (BaseAccessibilityService.getInstance().
-							checkAccessibilityEnabled(getPackageName() + "/" + AutoTestService.class.getCanonicalName())) {
+							checkAccessibilityEnabled(getPackageName() + "/" + AutoDismissService.class.getCanonicalName())) {
 						Dialog dialog = new Dialog(MainActivity.this,
 								R.style.dialog);
 						dialog.setContentView(R.layout.dialog);
@@ -65,6 +69,12 @@ public class MainActivity extends Activity {
 								Toast.LENGTH_SHORT).show();
 						BaseAccessibilityService.getInstance().goAccess();
 					}
+				}
+				
+				// 测试所有Activity
+				if (position == 4) {
+					Intent intent = new Intent(MainActivity.this, AutoTestService.class);
+					startService(intent);
 				}
 
 			}
