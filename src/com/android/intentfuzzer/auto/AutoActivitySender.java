@@ -5,46 +5,23 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 
+import com.android.intentfuzzer.IntermediateActivity;
 import com.android.intentfuzzer.fuzz.BasicFuzzIntent;
 
 public class AutoActivitySender implements AutoSender<Intent> {
 	
 	private Activity mActivityContext;
+	public static final String KEY_INTENT = "fuzzIntent";
 	
-	private Handler mMainHandler;
-	
-	private static final int DELAY_ACTIIVTY_FINISH = 1000;
-	
-	public AutoActivitySender(Context context, Handler mainHandler) {
+	public AutoActivitySender(Context context) {
 		this.mActivityContext = (Activity) context;
-		this.mMainHandler = mainHandler;
 	}
-	
 
 	@Override
 	public void send(final Intent fuzzIntent) {
-		mMainHandler.post(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					mActivityContext.startActivityForResult(fuzzIntent, Constants.REQUEST_CODE_ACTIIVTY, null);
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		
-		mMainHandler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					mActivityContext.finishActivity(Constants.REQUEST_CODE_ACTIIVTY);
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}, DELAY_ACTIIVTY_FINISH);
-		
+		Intent intent = new Intent(mActivityContext, IntermediateActivity.class);
+		intent.putExtra(KEY_INTENT, fuzzIntent);
+		mActivityContext.startActivity(intent);
 	}
 
 }

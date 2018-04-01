@@ -55,34 +55,39 @@ public final class R {
         public static final int application=0x7f020002;
         public static final int fuzzer_bg=0x7f020003;
         public static final int ic_launcher=0x7f020004;
-        public static final int system=0x7f020005;
+        public static final int shape_layout=0x7f020005;
+        public static final int system=0x7f020006;
     }
     public static final class id {
-        public static final int about_text=0x7f090001;
-        public static final int app_icon=0x7f09000a;
-        public static final int app_listview=0x7f09000e;
-        public static final int app_name=0x7f09000b;
-        public static final int cmp_listview=0x7f090004;
-        public static final int component_name=0x7f090000;
-        public static final int fuzz_all_null=0x7f090005;
-        public static final int fuzz_all_se=0x7f090006;
-        public static final int gridview=0x7f090007;
-        public static final int img_menu=0x7f090008;
-        public static final int label_menu=0x7f090009;
-        public static final int menu_settings=0x7f09000f;
-        public static final int package_name=0x7f09000c;
-        public static final int progressbar=0x7f09000d;
-        public static final int type_select=0x7f090003;
-        public static final int type_surportted=0x7f090002;
+        public static final int about_text=0x7f090004;
+        public static final int app_icon=0x7f09000d;
+        public static final int app_listview=0x7f090011;
+        public static final int app_name=0x7f09000e;
+        public static final int cmp_listview=0x7f090007;
+        public static final int component_name=0x7f090003;
+        public static final int fuzz_all_null=0x7f090008;
+        public static final int fuzz_all_se=0x7f090009;
+        public static final int gridview=0x7f09000a;
+        public static final int img_menu=0x7f09000b;
+        public static final int label_menu=0x7f09000c;
+        public static final int menu_settings=0x7f090012;
+        public static final int package_name=0x7f09000f;
+        public static final int progressbar=0x7f090010;
+        public static final int tv_result=0x7f090002;
+        public static final int tv_started=0x7f090001;
+        public static final int tv_starting=0x7f090000;
+        public static final int type_select=0x7f090006;
+        public static final int type_surportted=0x7f090005;
     }
     public static final class layout {
-        public static final int component=0x7f030000;
-        public static final int dialog=0x7f030001;
-        public static final int fuzzer=0x7f030002;
-        public static final int main=0x7f030003;
-        public static final int menu_item=0x7f030004;
-        public static final int package_info=0x7f030005;
-        public static final int package_infos=0x7f030006;
+        public static final int activity_intermediate=0x7f030000;
+        public static final int component=0x7f030001;
+        public static final int dialog=0x7f030002;
+        public static final int fuzzer=0x7f030003;
+        public static final int main=0x7f030004;
+        public static final int menu_item=0x7f030005;
+        public static final int package_info=0x7f030006;
+        public static final int package_infos=0x7f030007;
     }
     public static final class menu {
         public static final int main=0x7f080000;

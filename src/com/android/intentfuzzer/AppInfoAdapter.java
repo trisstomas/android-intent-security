@@ -41,7 +41,6 @@ public class AppInfoAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertview, ViewGroup viewGroup) {
-
 		View view = null;
 		ViewHolder holder = null;
 		if (convertview == null || convertview.getTag() == null) {

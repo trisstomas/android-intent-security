@@ -63,8 +63,28 @@ public class AutoTestManager {
 	}
 	
 	// 在子线程中执行该方法
+	public void batchSendWithComponentName(List<ComponentName> componentNames, int type) {
+		Utils.d(AutoTestService.class, "batchSendWithComponentName start...");
+		LogObserver.getInstance().start();
+		for (ComponentName componentName : componentNames) {
+			Intent intent = new NullFuzzIntent();
+			intent.setComponent(componentName);
+			Utils.d(AutoTestManager.class, "Send: " + componentName);
+			send(type, intent);
+			
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		LogObserver.getInstance().stop();
+	}
+	
+	// 在子线程中执行该方法
 	public void batchSend(List list) {
 		Utils.d(AutoTestService.class, "batchSend start...");
+		LogObserver.getInstance().start();
 		for (int i = 0; i < list.size(); i++) {
 			Object component = list.get(i);
 			Intent intent = new NullFuzzIntent();
@@ -72,19 +92,19 @@ public class AutoTestManager {
 			if (component instanceof ActivityInfo) {
 				ActivityInfo activityInfo = (ActivityInfo) component;
 				intent.setComponent(new ComponentName(activityInfo.packageName, activityInfo.name));
+				Utils.d(AutoTestManager.class, "Send: " + activityInfo);
 				send(SEND_TYPE_ACTIVITY, intent);
 			} else if (component instanceof ServiceInfo) {
 				// TODO
 			}
 			
 			try {
-				Thread.sleep(1500);
+				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
-			Utils.d(AutoTestManager.class, "Send Next...");
 		}
+		LogObserver.getInstance().stop();
 	}
 
 	public void send(int type, Intent fuzzIntent) {
@@ -103,12 +123,12 @@ public class AutoTestManager {
 		Log.d(TAG, "AutoManager send start");
 		autoSender.send(fuzzIntent);
 	}
-
+	
 	private AutoSender<Intent> createNewSender(int type) {
 		AutoSender<Intent> autoSender = null;
 		switch (type) {
 		case SEND_TYPE_ACTIVITY:
-			autoSender = new AutoActivitySender(mContext, mMainHandler);
+			autoSender = new AutoActivitySender(mContext);
 			break;
 
 		case SEND_TYPE_RECEIVER:

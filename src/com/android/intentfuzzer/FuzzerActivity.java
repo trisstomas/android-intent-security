@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import com.android.intentfuzzer.auto.AutoTestManager;
+import com.android.intentfuzzer.auto.LogObserver;
 import com.android.intentfuzzer.util.SerializableTest;
 import com.android.intentfuzzer.util.Utils;
 
@@ -202,8 +203,13 @@ public class FuzzerActivity extends Activity {
 					return;
 				}
 				
-				Message obtainMessage = mMainHandler.obtainMessage(MSG_SEND, 0);
-				mMainHandler.sendMessage(obtainMessage);
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						AutoTestManager.getInstance().batchSendWithComponentName(components, 
+								Utils.switchToNewType(ipcNamesToTypes.get(currentType)));
+					}
+				}).start();
 			}
 		});
 

@@ -19,7 +19,7 @@ public class AutoTestService extends Service {
 	public static AtomicBoolean sAutoTestStarted = new AtomicBoolean(false);
 	
 	private ComponentQuery mComponentQuery;
-
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;

@@ -3,10 +3,13 @@ package com.android.intentfuzzer.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.android.intentfuzzer.auto.AutoTestManager;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 public class Utils {
@@ -32,6 +35,19 @@ public class Utils {
 	public static void d(Class clazz, String msg) {
 		Log.d(TAG, clazz.getSimpleName() + ":" + msg);
 	}
+	
+	public static int switchToNewType(int oldType) {
+		switch (oldType) {
+		case ACTIVITIES:
+			return AutoTestManager.SEND_TYPE_ACTIVITY;
+		case RECEIVERS:
+			return AutoTestManager.SEND_TYPE_RECEIVER;	
+		case SERVICES:
+			return AutoTestManager.SEND_TYPE_SERVICE;
+		default:
+			return -1;
+		}
+	}
 
 	public static List<AppInfo> getPackageInfo(Context context, int type) {
 		List<AppInfo> pkgInfoList = new ArrayList<AppInfo>();
@@ -46,6 +62,15 @@ public class Utils {
 
 		for (int i = 0; i < packages.size(); i++) {
 			PackageInfo packageInfo = packages.get(i);
+			
+			// 如果使运行在 system_server 进程的组件 crash 会导致手机重启...
+			// 所以自动化时，不对安卓系统的组件进行测试
+			// 同时也不测试 intentfuzzer 应用本身
+			if ("android".equals(packageInfo.packageName) 
+					|| "com.android.intentfuzzer".equals(packageInfo.packageName)) {
+				continue;
+			}
+			
 			if (type == SYSTEM_APPS) {
 				if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 1) {
 					pkgInfoList.add(fillAppInfo(packageInfo, context));

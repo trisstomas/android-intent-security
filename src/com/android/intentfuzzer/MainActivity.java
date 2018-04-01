@@ -4,6 +4,7 @@ import com.android.intentfuzzer.auto.AutoDismissService;
 import com.android.intentfuzzer.auto.AutoTestManager;
 import com.android.intentfuzzer.auto.AutoTestService;
 import com.android.intentfuzzer.auto.BaseAccessibilityService;
+import com.android.intentfuzzer.auto.LogObserver;
 import com.android.intentfuzzer.util.Utils;
 
 import android.os.Bundle;
@@ -29,6 +30,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.main);
 		
 		AutoTestManager.getInstance().init(this);
+		LogObserver.getInstance().init(this);
 		
 		gridView = (GridView) findViewById(R.id.gridview);
 		gridView.setSelector(new ColorDrawable(Color.TRANSPARENT));

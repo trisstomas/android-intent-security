@@ -7,6 +7,8 @@
     <uses-sdk
         android:minSdkVersion="16"
         android:targetSdkVersion="16" />
+    
+    <uses-permission android:name="android.permission.READ_LOGS"/>
 
     <application
         android:name=".MyApp"
@@ -32,6 +34,11 @@
             android:name=".FuzzerActivity"
             android:exported="false"
             android:label="@string/app_name" >
+        </activity>
+        
+        <activity 
+            android:name="com.android.intentfuzzer.IntermediateActivity"
+            android:theme="@style/dialog">
         </activity>
 
         <service
