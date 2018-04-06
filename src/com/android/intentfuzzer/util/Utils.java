@@ -58,6 +58,7 @@ public class Utils {
 								| PackageManager.GET_ACTIVITIES
 								| PackageManager.GET_RECEIVERS
 								| PackageManager.GET_INSTRUMENTATION
+								| PackageManager.GET_PROVIDERS
 								| PackageManager.GET_SERVICES);
 
 		for (int i = 0; i < packages.size(); i++) {

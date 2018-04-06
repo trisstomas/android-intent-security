@@ -288,10 +288,10 @@ public class FuzzerActivity extends Activity {
 				AutoTestManager.getInstance().send(this, AutoTestManager.SEND_TYPE_ACTIVITY, intent);
 				return true;
 			case Utils.RECEIVERS:
-				sendBroadcast(intent);
+				AutoTestManager.getInstance().send(this, AutoTestManager.SEND_TYPE_RECEIVER, intent);
 				return true;
 			case Utils.SERVICES:
-				startService(intent);
+				AutoTestManager.getInstance().send(this, AutoTestManager.SEND_TYPE_SERVICE, intent);
 				return true;
 			default:
 				return true;

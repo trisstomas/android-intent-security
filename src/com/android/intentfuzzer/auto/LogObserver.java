@@ -78,12 +78,19 @@ public class LogObserver {
 				Utils.d(LogObserver.class, "init LogFetcher success");
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				Utils.d(LogFetcher.class, e.toString());
 			} catch (IOException e) {
 				e.printStackTrace();
+				Utils.d(LogFetcher.class, e.toString());
 			}
 			
-			DataInputStream dis = new DataInputStream(mProcess.getInputStream());
+			DataInputStream dis = null;
 			String line = null;
+			try {
+				dis = new DataInputStream(mProcess.getInputStream());
+			} catch(Exception e){
+				Utils.d(LogFetcher.class, "exception in opening input stream");
+			}
 			
 			while (sStarted) {
 				try {

@@ -47,7 +47,7 @@ public class AutoTestService extends Service {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				Map<Integer, List> map = mComponentQuery.query(ComponentQuery.TYPE_BROADCAST);
+				Map<Integer, List> map = mComponentQuery.query(ComponentQuery.TYPE_ALL);
 				AutoTestManager.getInstance().batchSend(map);
 				sAutoTestStarted.set(false);
 			}

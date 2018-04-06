@@ -115,6 +115,9 @@ public class AutoTestManager {
 				} 
 				
 				for (BasicFuzzIntent intent : FuzzIntentFatory.getInstance().getFuzzIntents(componentName)) {
+					if (type == SEND_TYPE_PROVIDER) {
+						intent.putExtra("providerinfo", (ProviderInfo) component);
+					}
 					startIntermediateActivity(intent, type, componentName);
 					
 					Utils.d(AutoTestManager.class, "send type:" + type + " intent:"  + intent.toString() + " to:" + componentName.toString());
@@ -125,6 +128,7 @@ public class AutoTestManager {
 		}
 		
 		LogObserver.getInstance().stop();
+		Utils.d(AutoTestManager.class, "batchSend stop");
 	}
 	
 	// 组件的发送间隔为 2s 一个
