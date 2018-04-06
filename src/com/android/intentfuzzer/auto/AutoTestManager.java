@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.android.intentfuzzer.fuzz.BasicFuzzIntent;
+import com.android.intentfuzzer.fuzz.FuzzIntentFatory;
 import com.android.intentfuzzer.fuzz.NullFuzzIntent;
 import com.android.intentfuzzer.util.Utils;
 
@@ -87,22 +88,30 @@ public class AutoTestManager {
 		LogObserver.getInstance().start();
 		for (int i = 0; i < list.size(); i++) {
 			Object component = list.get(i);
-			Intent intent = new NullFuzzIntent();
+			
+			ComponentName componentName = null;
+			int type = 0;
 			
 			if (component instanceof ActivityInfo) {
 				ActivityInfo activityInfo = (ActivityInfo) component;
-				intent.setComponent(new ComponentName(activityInfo.packageName, activityInfo.name));
-				Utils.d(AutoTestManager.class, "Send: " + activityInfo);
-				send(SEND_TYPE_ACTIVITY, intent);
+				type = SEND_TYPE_ACTIVITY;
+				componentName = new ComponentName(activityInfo.packageName, activityInfo.name);
 			} else if (component instanceof ServiceInfo) {
 				// TODO
 			}
 			
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			for (BasicFuzzIntent intent : FuzzIntentFatory.getInstance().getFuzzIntents(componentName)) {
+				send(type, intent);
+				
+				Utils.d(AutoTestManager.class, "send intent:"  + intent.toString() + " to:" + componentName.toString());
+				
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
+			
 		}
 		LogObserver.getInstance().stop();
 	}
