@@ -9,6 +9,7 @@ import com.android.intentfuzzer.util.ParcelableTest;
 import com.android.intentfuzzer.util.SerializableTest;
 
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Parcelable;
 
@@ -53,9 +54,8 @@ public abstract class BasicFuzzIntent extends Intent {
 		SAMPLE_ACTIONS.add("android.settings.NETWORK_OPERATOR_SETTINGS");
 		SAMPLE_ACTIONS.add("android.settings.USER_DICTIONARY_SETTINGS");
 		
-		SAMPLE_EXTRAS.add(new SerializableTest());
 		SAMPLE_EXTRAS.add("com.android.intentfuzzer.SAMPLE_EXTRA");
-		SAMPLE_EXTRAS.add(new ParcelableTest());
+		SAMPLE_EXTRAS.add(new ApplicationInfo());
 		
 	}
 	

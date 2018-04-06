@@ -1,6 +1,7 @@
 package com.android.intentfuzzer.auto;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.android.intentfuzzer.componentquery.ComponentQuery;
@@ -46,8 +47,8 @@ public class AutoTestService extends Service {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				List queryResultList = mComponentQuery.query(ComponentQuery.TYPE_ACTIVITY);
-				AutoTestManager.getInstance().batchSend(queryResultList);
+				Map<Integer, List> map = mComponentQuery.query(ComponentQuery.TYPE_BROADCAST);
+				AutoTestManager.getInstance().batchSend(map);
 				sAutoTestStarted.set(false);
 			}
 		}).start();

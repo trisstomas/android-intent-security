@@ -3,7 +3,13 @@ package com.android.intentfuzzer.auto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.android.intentfuzzer.auto.sender.AutoActivitySender;
+import com.android.intentfuzzer.auto.sender.AutoBroadcastSender;
+import com.android.intentfuzzer.auto.sender.AutoProviderSender;
+import com.android.intentfuzzer.auto.sender.AutoSender;
+import com.android.intentfuzzer.auto.sender.AutoServiceSender;
 import com.android.intentfuzzer.fuzz.BasicFuzzIntent;
 import com.android.intentfuzzer.fuzz.FuzzIntentFatory;
 import com.android.intentfuzzer.fuzz.NullFuzzIntent;
@@ -14,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.inputmethodservice.Keyboard.Key;
 import android.os.Handler;
@@ -23,10 +30,15 @@ import android.util.Log;
 public class AutoTestManager {
 
 	private final static String TAG = AutoTestManager.class.getSimpleName();
+	
+	public static final String KEY_INTENT = "fuzzIntent";
+	public static final String KEY_TYPE = "type";
+	public static final String KEY_COMPONMENT_NAME = "cn";
 
 	public static final int SEND_TYPE_ACTIVITY = 1;
 	public static final int SEND_TYPE_RECEIVER = 2;
 	public static final int SEND_TYPE_SERVICE = 3;
+	public static final int SEND_TYPE_PROVIDER = 4;
 
 	private Handler mMainHandler;
 
@@ -68,55 +80,71 @@ public class AutoTestManager {
 		Utils.d(AutoTestService.class, "batchSendWithComponentName start...");
 		LogObserver.getInstance().start();
 		for (ComponentName componentName : componentNames) {
-			Intent intent = new NullFuzzIntent();
-			intent.setComponent(componentName);
-			Utils.d(AutoTestManager.class, "Send: " + componentName);
-			send(type, intent);
-			
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			for (BasicFuzzIntent intent : FuzzIntentFatory.getInstance().getFuzzIntents(componentName)) {
+				Utils.d(AutoTestManager.class, "send intent:"  + intent.toString() + " to:" + componentName.toString());
+				
+				startIntermediateActivity(intent, type, componentName);
+				
+				sleepAWhile();
 			}
 		}
 		LogObserver.getInstance().stop();
 	}
 	
 	// 在子线程中执行该方法
-	public void batchSend(List list) {
+	public void batchSend(Map<Integer, List> map) {
 		Utils.d(AutoTestService.class, "batchSend start...");
 		LogObserver.getInstance().start();
-		for (int i = 0; i < list.size(); i++) {
-			Object component = list.get(i);
-			
-			ComponentName componentName = null;
-			int type = 0;
-			
-			if (component instanceof ActivityInfo) {
-				ActivityInfo activityInfo = (ActivityInfo) component;
-				type = SEND_TYPE_ACTIVITY;
-				componentName = new ComponentName(activityInfo.packageName, activityInfo.name);
-			} else if (component instanceof ServiceInfo) {
-				// TODO
-			}
-			
-			for (BasicFuzzIntent intent : FuzzIntentFatory.getInstance().getFuzzIntents(componentName)) {
-				send(type, intent);
+		
+		for (Integer type : map.keySet()) {
+			List list = map.get(type);
+			for (int i = 0; i < list.size(); i++) {
+				Object component = list.get(i);
 				
-				Utils.d(AutoTestManager.class, "send intent:"  + intent.toString() + " to:" + componentName.toString());
+				ComponentName componentName = null;
 				
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				if (type == SEND_TYPE_ACTIVITY || type == SEND_TYPE_RECEIVER) {
+					ActivityInfo activityInfo = (ActivityInfo) component;
+					componentName = new ComponentName(activityInfo.packageName, activityInfo.name);
+				} else if (type == SEND_TYPE_SERVICE) {
+					ServiceInfo serviceInfo = (ServiceInfo) component;
+					componentName = new ComponentName(serviceInfo.packageName, serviceInfo.name);
+				} else if (type == SEND_TYPE_PROVIDER) {
+					ProviderInfo providerInfo = (ProviderInfo) component;
+					componentName = new ComponentName(providerInfo.packageName, providerInfo.name);
+				} 
+				
+				for (BasicFuzzIntent intent : FuzzIntentFatory.getInstance().getFuzzIntents(componentName)) {
+					startIntermediateActivity(intent, type, componentName);
+					
+					Utils.d(AutoTestManager.class, "send type:" + type + " intent:"  + intent.toString() + " to:" + componentName.toString());
+					
+					sleepAWhile();
 				}
 			}
-			
 		}
+		
 		LogObserver.getInstance().stop();
 	}
+	
+	// 组件的发送间隔为 2s 一个
+	private void sleepAWhile() {
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void startIntermediateActivity(Intent fuzzIntent, int type, ComponentName componentName) {
+		Intent intent = new Intent(mContext, IntermediateActivity.class);
+		intent.putExtra(KEY_INTENT, fuzzIntent);
+		intent.putExtra(KEY_TYPE, type);
+		intent.putExtra(KEY_COMPONMENT_NAME, componentName);
+		mContext.startActivity(intent);
+	}
 
-	public void send(int type, Intent fuzzIntent) {
+	public void send(Activity activityContext, int type, Intent fuzzIntent) {
 		AutoSender<Intent> autoSender = mSenderMap.get(type);
 		if (autoSender == null) {
 			autoSender = createNewSender(type);
@@ -130,22 +158,30 @@ public class AutoTestManager {
 		}
 
 		Log.d(TAG, "AutoManager send start");
-		autoSender.send(fuzzIntent);
+		try {
+			autoSender.send(activityContext, fuzzIntent);
+		} catch(Exception e) {
+			Utils.d(AutoTestManager.class, "exception happen during send:" + e.toString());
+		}
 	}
 	
 	private AutoSender<Intent> createNewSender(int type) {
 		AutoSender<Intent> autoSender = null;
 		switch (type) {
 		case SEND_TYPE_ACTIVITY:
-			autoSender = new AutoActivitySender(mContext);
+			autoSender = new AutoActivitySender(mMainHandler);
 			break;
 
 		case SEND_TYPE_RECEIVER:
-
+			autoSender = new AutoBroadcastSender(mMainHandler);
 			break;
 
 		case SEND_TYPE_SERVICE:
-
+			autoSender = new AutoServiceSender(mMainHandler);
+			break;
+			
+		case SEND_TYPE_PROVIDER:
+			autoSender = new AutoProviderSender(mMainHandler);
 			break;
 
 		default:

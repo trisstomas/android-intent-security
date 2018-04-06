@@ -1,29 +1,37 @@
-package com.android.intentfuzzer;
+package com.android.intentfuzzer.auto;
 
-import com.android.intentfuzzer.auto.AutoActivitySender;
-import com.android.intentfuzzer.auto.Constants;
+import com.android.intentfuzzer.R;
+import com.android.intentfuzzer.R.id;
+import com.android.intentfuzzer.R.layout;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 public class IntermediateActivity extends Activity {
 	
 	private Handler mMainHandler;
 	private Handler mWorkHandler;
+	private ComponentName mComponentName;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_intermediate);
 		
+		 getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		
 		mMainHandler = new Handler();
-		final Intent fuzzIntent = getIntent().getParcelableExtra(AutoActivitySender.KEY_INTENT);
+		final Intent fuzzIntent = getIntent().getParcelableExtra(AutoTestManager.KEY_INTENT);
+		final int type = getIntent().getIntExtra(AutoTestManager.KEY_TYPE, 0);
+		mComponentName = getIntent().getParcelableExtra(AutoTestManager.KEY_COMPONMENT_NAME);
 		
 		HandlerThread worker = new HandlerThread("worker");
 		worker.start();
@@ -31,23 +39,25 @@ public class IntermediateActivity extends Activity {
 		
 		setStarting();
 		
+		// 0.3s 后启动该组件
 		mWorkHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				try {
 					setStarted();
-					IntermediateActivity.this.startActivityForResult(fuzzIntent, Constants.REQUEST_CODE_ACTIIVTY, null);
+					AutoTestManager.getInstance().send(IntermediateActivity.this, type, fuzzIntent);
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}, 300);
 		
+		// 0.5s 后停止该组件
 		mWorkHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					IntermediateActivity.this.finishActivity(Constants.REQUEST_CODE_ACTIIVTY);
+					// 再等待 0.5s 后停止 IntermediaeActivity 界面
 					Thread.sleep(500);
 					setResult("finish success");
 				} catch(Exception e) {
@@ -71,7 +81,12 @@ public class IntermediateActivity extends Activity {
 		mMainHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				findViewById(R.id.tv_started).setVisibility(View.VISIBLE);
+				TextView textView = (TextView) findViewById(R.id.tv_started);
+				textView.setVisibility(View.VISIBLE);
+				
+				if (mComponentName != null) {
+					textView.setText("start: " + mComponentName.getClassName());
+				}
 			}
 		});
 	}

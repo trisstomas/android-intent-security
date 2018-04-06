@@ -1,6 +1,7 @@
 package com.android.intentfuzzer.componentquery;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ComponentQuery {
 
@@ -10,6 +11,6 @@ public interface ComponentQuery {
 	int TYPE_BROADCAST = 4;
 	int TYPE_PROVIDER = 5;
 	
-	List query(int type); 
+	Map<Integer, List> query(int type); 
 	
 }

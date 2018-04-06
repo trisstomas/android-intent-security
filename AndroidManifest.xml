@@ -37,7 +37,7 @@
         </activity>
         
         <activity 
-            android:name="com.android.intentfuzzer.IntermediateActivity"
+            android:name="com.android.intentfuzzer.auto.IntermediateActivity"
             android:theme="@style/dialog">
         </activity>
 

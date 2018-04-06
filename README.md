@@ -37,15 +37,18 @@ For a single component, just click an item listed. While click the "Null Fuzz Al
 
 ## 2. 模糊 Intent 生成
 
+- [x] 完成共 7 种模糊 Intent 测试用例
+
 ## 3. 测试自动化
 
-- <input type="checkbox" checked="checked" /> 批量测试组件
-- <input type="checkbox" checked="checked" /> 自动开启、关闭 Activity，避免内存占用
+- [x] 批量测试组件
+- [x] 自动开启、关闭 Activity，避免内存占用
+- [x] 增加广播、服务组件的测试
 
 ## 4. 异常信息捕捉
 
-- <input type="checkbox" checked="checked" /> 通过监听 EventLog 的方式，实现异常捕捉
-- <input type="checkbox" checked="checked" /> 批量测试日志持久化到数据库中
+- [x] 通过监听 EventLog 的方式，实现异常捕捉
+- [x] 批量测试日志持久化到数据库中
 
 ## 5. 测试结果统计、可视化
 

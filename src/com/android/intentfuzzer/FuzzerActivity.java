@@ -54,40 +54,6 @@ public class FuzzerActivity extends Activity {
 	private static Map<Integer, String> ipcTypesToNames = new TreeMap<Integer, String>();
 	private static Map<String, Integer> ipcNamesToTypes = new HashMap<String, Integer>();
 
-	private Handler mMainHandler = new Handler() {
-		public void handleMessage(android.os.Message msg) {
-			switch (msg.what) {
-			case MSG_SEND:
-				int curIndex = (Integer) msg.obj;
-				Intent intent = new Intent();
-				ComponentName componentName = components.get(curIndex);
-				intent.setComponent(componentName);
-				
-				if (sendIntentByType(intent, currentType)) {
-					Toast.makeText(FuzzerActivity.this,
-							"Sent Null " + intent, Toast.LENGTH_LONG)
-							.show();
-				} else {
-					Toast.makeText(FuzzerActivity.this,
-							R.string.send_faild, Toast.LENGTH_LONG).show();
-				}
-				
-				curIndex++;
-				if (curIndex >= components.size()) {
-					Log.d("FuzzerActivity", "send finish");
-				} else {
-					Message obtainMessage = mMainHandler.obtainMessage(MSG_SEND, curIndex);
-					mMainHandler.sendMessageDelayed(obtainMessage, DELAY_BATCH_SEND);
-				}
-				
-				break;
-
-			default:
-				break;
-			}
-		};
-	};
-
 	static {
 		ipcTypesToNames.put(Utils.ACTIVITIES, "Activities");
 		ipcTypesToNames.put(Utils.RECEIVERS, "Receivers");
@@ -319,7 +285,7 @@ public class FuzzerActivity extends Activity {
 		try {
 			switch (ipcNamesToTypes.get(type)) {
 			case Utils.ACTIVITIES:
-				AutoTestManager.getInstance().send(AutoTestManager.SEND_TYPE_ACTIVITY, intent);
+				AutoTestManager.getInstance().send(this, AutoTestManager.SEND_TYPE_ACTIVITY, intent);
 				return true;
 			case Utils.RECEIVERS:
 				sendBroadcast(intent);

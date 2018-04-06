@@ -66,8 +66,10 @@ public class Utils {
 			// 如果使运行在 system_server 进程的组件 crash 会导致手机重启...
 			// 所以自动化时，不对安卓系统的组件进行测试
 			// 同时也不测试 intentfuzzer 应用本身
+			// 因为使用的虚拟机进行测试，不支持 camera
 			if ("android".equals(packageInfo.packageName) 
-					|| "com.android.intentfuzzer".equals(packageInfo.packageName)) {
+					|| "com.android.intentfuzzer".equals(packageInfo.packageName)
+					|| "com.android.camera2".equals(packageInfo.packageName)) {
 				continue;
 			}
 			
