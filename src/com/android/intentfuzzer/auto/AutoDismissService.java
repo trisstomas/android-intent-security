@@ -13,7 +13,6 @@ public class AutoDismissService extends BaseAccessibilityService {
 			return;
 		}
 		
-		// 当测试 APP 中如果应用发生了异常 Crash，那么系统将会弹出一个 AppErrorDialog，这时需要自动点击 OK 键取消
 		dismissAppErrorDialogIfExists(event);
 		
 //		Utils.d(AutoDismissService.class, event.toString());
@@ -24,6 +23,7 @@ public class AutoDismissService extends BaseAccessibilityService {
 		
 	}
 	
+	// 当测试 APP 中如果应用发生了异常 Crash，那么系统将会弹出一个 AppErrorDialog，这时需要自动点击 OK 键取消
 	private void dismissAppErrorDialogIfExists(AccessibilityEvent event) {
 		if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
 				&& event.getPackageName().equals("android")) {

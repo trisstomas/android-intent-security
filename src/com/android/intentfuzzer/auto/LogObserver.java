@@ -52,6 +52,7 @@ public class LogObserver {
 		mLogFetcher = new LogFetcher();
 	}
 	
+	// 启动异常LOG监测
 	public void start() {
 		if (sStarted) {
 			return ;
@@ -60,6 +61,7 @@ public class LogObserver {
 		mLogFetcher.start();
 	}
 	
+	// 停止异常LOG监测
 	public void stop() {
 		sStarted = false;
 		mLogFetcher.interrupt();
@@ -92,6 +94,7 @@ public class LogObserver {
 				Utils.d(LogFetcher.class, "exception in opening input stream");
 			}
 			
+			// 进入无限循环，不断读取异常日志
 			while (sStarted) {
 				try {
 					while ((line = dis.readLine()) != null) {

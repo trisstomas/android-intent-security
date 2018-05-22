@@ -39,6 +39,7 @@ public class DBHelper extends SQLiteOpenHelper {
 				+ COLUMN_EXCEPTION_TYPE + " TEXT," 
 				+ COLUMN_EXCEPTION_DETAIL + " TEXT,"
 				+ COLUMN_EXCEPTION_TIMESTAMP + " BIGINT)";
+		Utils.d(DBHelper.class, sqlStmt);
 		db.execSQL(sqlStmt);
 	}
 
