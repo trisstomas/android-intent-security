@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ComponentInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.inputmethodservice.Keyboard.Key;
@@ -91,6 +92,10 @@ public class AutoTestManager {
 		LogObserver.getInstance().stop();
 	}
 	
+	private boolean allowSend(ComponentInfo info) {
+		return info.exported;
+	}
+	
 	// 在子线程中执行该方法
 	public void batchSend(Map<Integer, List> map) {
 		Utils.d(AutoTestService.class, "batchSend start...");
@@ -100,6 +105,14 @@ public class AutoTestManager {
 			List list = map.get(type);
 			for (int i = 0; i < list.size(); i++) {
 				Object component = list.get(i);
+				
+				// 如果组件exported=false，意味着不对其它APP开放，是不能进行模糊测试的
+				if (component instanceof ComponentInfo) {
+					ComponentInfo info = (ComponentInfo) component;
+					if (!allowSend(info)) {
+						continue;
+					}
+				}
 				
 				ComponentName componentName = null;
 				
@@ -140,7 +153,7 @@ public class AutoTestManager {
 		}
 	}
 	
-	private void startIntermediateActivity(Intent fuzzIntent, int type, ComponentName componentName) {
+	public void startIntermediateActivity(Intent fuzzIntent, int type, ComponentName componentName) {
 		Intent intent = new Intent(mContext, IntermediateActivity.class);
 		intent.putExtra(KEY_INTENT, fuzzIntent);
 		intent.putExtra(KEY_TYPE, type);

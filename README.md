@@ -156,6 +156,25 @@ public List<BasicFuzzIntent> getFuzzIntents(ComponentName componentName) {
 
 每次测试单个组件，都会进行以上intent的发送
 
+## 使用scrapy爬取、下载、安装TOP应用
+
+使用步骤：
+
+1. brew install python3 // 安装python3
+2. pip3 install Scrapy // 安装Scrapy
+3. 下载项目
+4. cd <项目目录>
+5. scrapy crawl xiaomi // 启动爬虫并自动下载、安装应用
+
+## 测试结果
+
+### 系统应用
+
+
+### TOP50三方应用
+
+
+
 License
 ===================
 MIT License

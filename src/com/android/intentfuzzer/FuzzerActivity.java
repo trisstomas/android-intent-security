@@ -111,7 +111,7 @@ public class FuzzerActivity extends Activity {
 				for (ComponentName cmpName : components) {
 					if (cmpName.getClassName().equals(className)) {
 						toSend = cmpName;
-						break;
+						break; 
 					}
 				}
 
@@ -285,13 +285,13 @@ public class FuzzerActivity extends Activity {
 		try {
 			switch (ipcNamesToTypes.get(type)) {
 			case Utils.ACTIVITIES:
-				AutoTestManager.getInstance().send(this, AutoTestManager.SEND_TYPE_ACTIVITY, intent);
+				AutoTestManager.getInstance().startIntermediateActivity(intent, AutoTestManager.SEND_TYPE_ACTIVITY, intent.getComponent());
 				return true;
 			case Utils.RECEIVERS:
-				AutoTestManager.getInstance().send(this, AutoTestManager.SEND_TYPE_RECEIVER, intent);
+				AutoTestManager.getInstance().startIntermediateActivity(intent, AutoTestManager.SEND_TYPE_RECEIVER, intent.getComponent());
 				return true;
 			case Utils.SERVICES:
-				AutoTestManager.getInstance().send(this, AutoTestManager.SEND_TYPE_SERVICE, intent);
+				AutoTestManager.getInstance().startIntermediateActivity(intent, AutoTestManager.SEND_TYPE_SERVICE, intent.getComponent());
 				return true;
 			default:
 				return true;

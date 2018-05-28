@@ -29,7 +29,7 @@ public class LogObserver {
 	// group(0): processName
 	// group(1): exceptionName
 	// group(2): exceptionMessage
-	private static final String AM_CRASH_REGEX_STRING = "am_crash.*,.*,(.*),.*,(.*),(.*),.*,.*";
+	private static final String AM_CRASH_REGEX_STRING = "am_crash.*,.*,(.*),.*,(.*(Error|Exception)),(.*),.*,.*";
 	
 	private static Pattern sPattern = Pattern.compile(AM_CRASH_REGEX_STRING);
 	
@@ -121,7 +121,7 @@ public class LogObserver {
 			Utils.d(LogObserver.class, "match:" + line);
 			String processName = matcher.group(1);
 			String exceptionName = matcher.group(2);
-			String exceptionMessage = matcher.group(3);
+			String exceptionMessage = matcher.group(4);
 			exceptionInfo = new ExceptionInfo(processName, exceptionName, exceptionMessage, System.currentTimeMillis());
 		} else {
 //			Utils.d(LogObserver.class, "not match:" + line);
