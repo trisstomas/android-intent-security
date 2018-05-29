@@ -44,6 +44,12 @@ public class AutoDismissService extends BaseAccessibilityService {
             	Utils.d(AutoDismissService.class, "dismiss AppErrorDialog");
                 performViewClick(nodeInfo);
             }
+            
+            nodeInfo = findViewByText("取消", true);
+            if (nodeInfo != null) {
+            	Utils.d(AutoDismissService.class, "dismiss AppErrorDialog");
+                performViewClick(nodeInfo);
+            }
 		}
 	}
 
