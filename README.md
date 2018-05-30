@@ -33,6 +33,21 @@ For a single component, just click an item listed. While click the "Null Fuzz Al
 * adb pull /data/data/com.android.intentfuzzer/databases/result.db ./ (将测试结果 db 文件从手机拉到 PC)
 * 使用 PC 上的客户端进行查看
 
+## 简介
+
+### 类图
+
+![](ClassDiagram1.jpg)
+
+* AutoDismissService: 在测试过程中，出现异常系统弹框会自动取消
+* AutoTestManager: 测试管理者
+* AutoTestService: 自动化测试所有应用组件服务
+* ComponentQuery: 组件信息获取
+* AutoSender: 组件Intent发送
+* LogObserver: 监听系统中应用异常信息
+* DBHelper: 用于异常数据持久化
+* FuzzIntentFactory: 用于生成测试用的 fuzz intent
+
 ## 1. 组件信息收集
 
 - [x] PMS.getInstalledPackages
