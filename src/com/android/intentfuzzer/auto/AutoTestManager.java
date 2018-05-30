@@ -40,6 +40,7 @@ public class AutoTestManager {
 	public static final int SEND_TYPE_RECEIVER = 2;
 	public static final int SEND_TYPE_SERVICE = 3;
 	public static final int SEND_TYPE_PROVIDER = 4;
+	public static final int SEND_TYPE_DYNAMIC_RECEIVER = 5;
 
 	private Handler mMainHandler;
 
@@ -125,7 +126,10 @@ public class AutoTestManager {
 				} else if (type == SEND_TYPE_PROVIDER) {
 					ProviderInfo providerInfo = (ProviderInfo) component;
 					componentName = new ComponentName(providerInfo.packageName, providerInfo.name);
-				} 
+				} else if (type == SEND_TYPE_DYNAMIC_RECEIVER) {
+					// 发送动态广播的packageName可以不谈，className中的信息已经足够
+					componentName = new ComponentName("", (String) component);
+				}
 				
 				for (BasicFuzzIntent intent : FuzzIntentFatory.getInstance().getFuzzIntents(componentName)) {
 					if (type == SEND_TYPE_PROVIDER) {

@@ -196,17 +196,135 @@ public List<BasicFuzzIntent> getFuzzIntents(ComponentName componentName) {
 
 因为AOSP其开源性，我们可以轻松获取到安卓系统的源码并进行修改与编译，对于模糊测试，我们可以从系统的角度下手，对测试APP暴露定制的数据接口，使得APP可以轻松、高效的获取到运行在系统中的动态Receiver信息
 
-### 实现(1)
+整个AOSP的修改patch可查看文件：0001-add-getDynamicReceiverNames-in-AMS-for-fuzz-intent-t.patch
 
-修改IntentReceiver aidl文件，这里需要Binder的一些基础介绍
+### 实现(1) 修改IntentReceiver aidl文件
+
+
+这里需要Binder的一些基础介绍，可以参考博客：
+
+* [https://blog.csdn.net/fighting_sxw/article/details/78695658](https://blog.csdn.net/fighting_sxw/article/details/78695658)
+* [https://blog.csdn.net/csdn_of_coder/article/details/53897110](https://blog.csdn.net/csdn_of_coder/article/details/53897110)
+
+aidl 的基础，参考博客：
+
+* [https://blog.csdn.net/hardworkingant/article/details/72804210](https://blog.csdn.net/hardworkingant/article/details/72804210)
+
+
+代码修改：
+
+```java
+diff --git a/core/java/android/app/LoadedApk.java b/core/java/android/app/LoadedApk.java
+index 5709c93..2ae58aa 100644
+--- a/core/java/android/app/LoadedApk.java
++++ b/core/java/android/app/LoadedApk.java
+@@ -1031,6 +1031,15 @@ public final class LoadedApk {
+             }
+ 
+             @Override
++            public String getReceiverName() {
++                LoadedApk.ReceiverDispatcher rd = mDispatcher.get();
++                if (rd != null) {
++                    return rd.mReceiver.getClass().getName();
++                }
++                return null;
++            }
++
++            @Override
+             public void performReceive(Intent intent, int resultCode, String data,
+                     Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                 final LoadedApk.ReceiverDispatcher rd;
+                 
+diff --git a/core/java/android/content/IIntentReceiver.aidl b/core/java/android/content/IIntentReceiver.aidl
+index 3d92723..f3352d3 100644
+--- a/core/java/android/content/IIntentReceiver.aidl
++++ b/core/java/android/content/IIntentReceiver.aidl
+@@ -29,5 +29,6 @@ import android.os.Bundle;
+ oneway interface IIntentReceiver {
+     void performReceive(in Intent intent, int resultCode, String data,
+             in Bundle extras, boolean ordered, boolean sticky, int sendingUser);
++    String getReceiverName();
+ }
+```
+
+代码的修改的功能是在APP客户端的Binder Native中增加getReceiverName()接口，通过调用，客户端将返回动态Receiver的类名。获取到类名后，IntentFuzz测试动态广播时，就可以通过发送显示Intent以达到测试的目的。
+
 
 ### 实现(2)
 
-在System端暴露数据接口
+在SystemServer AMS端暴露数据接口以供IntentFuzzer调用
+
+```java
+diff --git a/services/core/java/com/android/server/am/ActivityManagerService.java b/services/core/java/com/android/server/am/ActivityManagerService.java
+index 53d4018..b278664 100644
+--- a/services/core/java/com/android/server/am/ActivityManagerService.java
++++ b/services/core/java/com/android/server/am/ActivityManagerService.java
+@@ -23003,6 +23003,18 @@ public final class ActivityManagerService extends ActivityManagerNative
+         }
+     }
+ 
++    @Override
++    public List<String> getDynamicReceiverNames() throws RemoteException {
++        List<String> receiverNames = new ArrayList<String>();
++        for (ReceiverList r : mRegisteredReceivers.values()) {
++            String receiverName = r.receiver.getReceiverName();
++            if (receiverName != null) {
++                receiverNames.add(receiverName);
++            }
++        }
++        return receiverNames;
++    }
++
+-- 
+```
+
+上述代码的作用是遍历保存在ActivityManagerService中的，系统中所有的动态广播信息，依次binder call到APP客户端，依次来获取所有动态广播的类名
 
 ### 实现(3)
 
 通过反射调用接口并获取动态广播信息
+
+```java
+diff --git a/core/java/android/app/ActivityManager.java b/core/java/android/app/ActivityManager.java
+index d752e52..2343c98 100644
+--- a/core/java/android/app/ActivityManager.java
++++ b/core/java/android/app/ActivityManager.java
+@@ -3030,6 +3030,14 @@ public class ActivityManager {
+         }
+     }
+ 
++    public List<String> getDynamicReceiverNames() {
++        try {
++            return ActivityManagerNative.getDefault().getDynamicReceiverNames();
++        } catch (RemoteException e) {
++            throw e.rethrowFromSystemServer();
++        }
++    }
++
+```
+
+上述是ActivityManager的修改，因为不确认被测试系统是否拥有该方法，所以以反射的形式去调用该接口，当发现接口存在时才触发调用，否则的就不去获取动态广播的信息。这样做的好处是可以兼容各种版本的安卓系统。
+
+/IntentFuzzer/src/com/android/intentfuzzer/componentquery/ExtraComponentQuery.java
+
+```java
+@Override
+	public Map<Integer, List> query(int type) {
+		Map<Integer, List> map = new HashMap<Integer, List>();
+		
+		Object object = ReflectUtils.reflect("android.app.ActivityMaanger")
+				.method("getDynamicReceiverNames").get();
+		
+		if (object != null && object instanceof List) {
+			List<String> list = (List<String>) object;
+			map.put(AutoTestManager.SEND_TYPE_DYNAMIC_RECEIVER, list);
+		} else {
+			Utils.d(ExtraComponentQuery.class, "getDynamicReceiverNames failed!");
+		}
+		
+		return map;
+	}
+```
 
 
 ## 数据来源
@@ -242,56 +360,81 @@ APP来源: 小米商店 http://app.mi.com/
 
 ## 测试结果
 
+100个应用分4批进行测试，每次测试25个应用。获取到有效应用组件信息情况:
+
+|组件类别|个数|
+|---|---|
+|Activity|1186|
+|Service|572|
+|BroadcastReceiver(static)|298|
+|BroadcastReceiver(dynamic)|89|
+|ContentProvider|186|
+|总结|2331|
+
+`共发送测试模糊intent次数: 17334`
+
+计算公式： (1186 + 572 + 298 + 89) * 6 + 186 * 4 * 6
+
+（注：因为ContentProvider作为数据相关操作组件，共有增删查改共4个接口，所以需要*4）
+
+`共出现异常次数: 837`
+
+
 ### 以异常类型为维度
 
 |序号|异常类型|出现异常次数|
 |---|---|---|
-|1|||
-|2|||
-|3|||
-|4|||
-|5|||
-|6|||
-|7|||
-|8|||
-|9|||
-|10|||
+|1|java.lang.NullPointerException|482|
+|2|java.lang.IllegalArgumentException|87|
+|3|java.io.IOException|69|
+|4|java.lang.IllegalStateException|41|
+|5|java.lang.ClassCastException|36|
+|6|java.lang.ArrayIndexOutOfBoundsException|25|
+|7|java.lang.IndexOutOfBoundsException|19|
+|8|android.content.ActivityNotFoundException|12|
+|9|android.database.sqlite.SQLiteReadOnlyDatabaseException|9|
+|10|java.lang.VerifyError|6|
+|11|java.lang.NoSuchFieldError|5|
+|12|android.database.sqlite.SQLiteCantOpenDatabaseException|3|
+|13|java.lang.OutOfMemoryError|3|
+|14|android.database.sqlite.SQLiteReadOnlyDatabaseException|3|
+|15|其它|37|
+
+(注：其它错误大多为 java.lang.UnsatisfiedLinkError 错误，为应用不兼容系统导致)
 
 
 ### 以应用为维度 (TOP10)
 
 |序号|应用包名|出现异常次数|
 |---|---|---|
-|1|||
-|2|||
-|3|||
-|4|||
-|5|||
-|6|||
-|7|||
-|8|||
-|9|||
-|10|||
+|1|com.v.study|51|
+|2|com.picsart.studio|46|
+|3|com.xueersi.parentsmeeting|43|
+|4|com.jifen.qukan|32|
+|5|com.cmplay.tiles2_cn.mi|28|
+|...|...|...|
+|96|com.tencent.mtt|2|
+|97|com.changba|1|
+|98|com.microsoft.office.word|1|
+|99|com.tudou.android|1|
+|100|com.tencent.wifimanager|0|
 
 ### 以组件异常为维度
 
 |序号|组件类型|出现异常次数|
 |---|---|---|
-|1|Activity||
-|2|Service|
-|3|静态Receiver||
-|4|动态Receiver||
-|5|Provider||
+|1|Activity|513|
+|2|Service|86|
+|3|静态Receiver|67|
+|4|动态Receiver|112|
+|5|Provider|59|
 
 ### 对比其它测试应用 (功能维度)
 
 |应用|Activity|Service|静态Receiver|动态Receiver|Provider|批量测试|
 |---|---|----|----|---|---|---|---|
-|IntentFuzzer||||||
-|IntentFuzzer加强|||||
-
-
-
+|IntentFuzzer|√|√|√|×|×|×|
+|IntentFuzzer加强|√|√|√|√|√|√|
 
 
 License

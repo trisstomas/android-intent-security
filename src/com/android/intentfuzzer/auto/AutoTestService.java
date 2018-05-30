@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.android.intentfuzzer.componentquery.ComponentQuery;
 import com.android.intentfuzzer.componentquery.DullComponentQuery;
+import com.android.intentfuzzer.componentquery.ExtraComponentQuery;
 import com.android.intentfuzzer.util.Utils;
 
 import android.app.Service;
@@ -20,6 +21,7 @@ public class AutoTestService extends Service {
 	public static AtomicBoolean sAutoTestStarted = new AtomicBoolean(false);
 	
 	private ComponentQuery mComponentQuery;
+	private ComponentQuery mExtraComponentQuery;
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -31,6 +33,7 @@ public class AutoTestService extends Service {
 		super.onCreate();
 		
 		mComponentQuery = new DullComponentQuery(this);
+		mExtraComponentQuery = new ExtraComponentQuery();
 	}
 	
 	@Override
@@ -48,6 +51,12 @@ public class AutoTestService extends Service {
 			@Override
 			public void run() {
 				Map<Integer, List> map = mComponentQuery.query(ComponentQuery.TYPE_ACTIVITY);
+				
+				Map<Integer, List> dynamicInfosMap = mExtraComponentQuery.query(0);
+				if (!dynamicInfosMap.isEmpty()) {
+					map.putAll(dynamicInfosMap);
+				}
+				
 				AutoTestManager.getInstance().batchSend(map);
 				sAutoTestStarted.set(false);
 			}

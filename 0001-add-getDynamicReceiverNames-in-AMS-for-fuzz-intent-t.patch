@@ -1,0 +1,164 @@
+From 7e7e2689263d5383760c66ac2aa8dc6d35b4c8b8 Mon Sep 17 00:00:00 2001
+From: wangyufeng <wyf0615@emails.bjut.edu.cn>
+Date: Wed, 12 May 2018 20:23:03 +0800
+Subject: [PATCH] add getDynamicReceiverNames in AMS for fuzz intent test
+
+Change-Id: Ie8c8c63b877c65ce6fa4a78d9727e7e9617c9af5
+Signed-off-by: wangyufeng <wyf0615@emails.bjut.edu.cn>
+---
+ core/java/android/app/ActivityManager.java         |  8 +++++
+ core/java/android/app/ActivityManagerNative.java   | 38 ++++++++++++++++++++++
+ core/java/android/app/IActivityManager.java        |  5 +++
+ core/java/android/app/LoadedApk.java               |  9 +++++
+ core/java/android/content/IIntentReceiver.aidl     |  1 +
+ .../android/server/am/ActivityManagerService.java  | 12 +++++++
+ 6 files changed, 73 insertions(+)
+
+diff --git a/core/java/android/app/ActivityManager.java b/core/java/android/app/ActivityManager.java
+index d752e52..2343c98 100644
+--- a/core/java/android/app/ActivityManager.java
++++ b/core/java/android/app/ActivityManager.java
+@@ -3030,6 +3030,14 @@ public class ActivityManager {
+         }
+     }
+ 
++    public List<String> getDynamicReceiverNames() {
++        try {
++            return ActivityManagerNative.getDefault().getDynamicReceiverNames();
++        } catch (RemoteException e) {
++            throw e.rethrowFromSystemServer();
++        }
++    }
++
+     /**
+      * Return the importance of a given package name, based on the processes that are
+      * currently running.  The return value is one of the importance constants defined
+diff --git a/core/java/android/app/ActivityManagerNative.java b/core/java/android/app/ActivityManagerNative.java
+index 9460ef4..faad44a 100644
+--- a/core/java/android/app/ActivityManagerNative.java
++++ b/core/java/android/app/ActivityManagerNative.java
+@@ -62,6 +62,8 @@ import java.util.List;
+
+ /** {@hide} */
+ public abstract class ActivityManagerNative extends Binder implements IActivityManager
+ {
+@@ -3003,6 +3005,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
+             return true;
+         }
+ 
++        case GET_DYNAMITC_RECEIVER_NAME_TRANSACTION: {
++            data.enforceInterface(IActivityManager.descriptor);
++            int userId = data.readInt();
++            List<String> list = getDynamicReceiverNames();
++            reply.writeNoException();
++            int N = list != null ? list.size() : -1;
++            reply.writeInt(N);
++            int i;
++            for (i=0; i<N; i++) {
++                reply.writeString(list.get(i));
++            }
++            return true;
++        }
++
+
+@@ -7115,6 +7131,28 @@ class ActivityManagerProxy implements IActivityManager
+         return res;
+     }
+ 
++    @Override
++    public List<String> getDynamicReceiverNames()
++            throws RemoteException {
++        Parcel data = Parcel.obtain();
++        Parcel reply = Parcel.obtain();
++        data.writeInterfaceToken(IActivityManager.descriptor);
++        mRemote.transact(GET_DYNAMITC_RECEIVER_NAME_TRANSACTION, data, reply, 0);
++        reply.readException();
++        ArrayList<String> list = null;
++        int N = reply.readInt();
++        if (N >= 0) {
++            list = new ArrayList<String>();
++            while (N > 0) {
++                list.add(reply.readString());
++                N--;
++            }
++        }
++        data.recycle();
++        reply.recycle();
++        return list;
++    }
++
+
+
+diff --git a/core/java/android/app/IActivityManager.java b/core/java/android/app/IActivityManager.java
+index 7b08238..4de0a07 100644
+--- a/core/java/android/app/IActivityManager.java
++++ b/core/java/android/app/IActivityManager.java
+@@ -662,6 +662,8 @@ public interface IActivityManager extends IInterface {
+             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options)
+             throws RemoteException;
+ 
++    public List<String> getDynamicReceiverNames() throws RemoteException;
++
+
+@@ -1084,6 +1086,9 @@ public interface IActivityManager extends IInterface {
+     int SEND_IDLE_JOB_TRIGGER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 375;
+     int SEND_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 376;
+ 
++    int GET_DYNAMITC_RECEIVER_NAME_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 378;
++
++
+
+diff --git a/core/java/android/app/LoadedApk.java b/core/java/android/app/LoadedApk.java
+index 5709c93..2ae58aa 100644
+--- a/core/java/android/app/LoadedApk.java
++++ b/core/java/android/app/LoadedApk.java
+@@ -1031,6 +1031,15 @@ public final class LoadedApk {
+             }
+ 
+             @Override
++            public String getReceiverName() {
++                LoadedApk.ReceiverDispatcher rd = mDispatcher.get();
++                if (rd != null) {
++                    return rd.mReceiver.getClass().getName();
++                }
++                return null;
++            }
++
++            @Override
+             public void performReceive(Intent intent, int resultCode, String data,
+                     Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                 final LoadedApk.ReceiverDispatcher rd;
+diff --git a/core/java/android/content/IIntentReceiver.aidl b/core/java/android/content/IIntentReceiver.aidl
+index 3d92723..f3352d3 100644
+--- a/core/java/android/content/IIntentReceiver.aidl
++++ b/core/java/android/content/IIntentReceiver.aidl
+@@ -29,5 +29,6 @@ import android.os.Bundle;
+ oneway interface IIntentReceiver {
+     void performReceive(in Intent intent, int resultCode, String data,
+             in Bundle extras, boolean ordered, boolean sticky, int sendingUser);
++    String getReceiverName();
+ }
+ 
+diff --git a/services/core/java/com/android/server/am/ActivityManagerService.java b/services/core/java/com/android/server/am/ActivityManagerService.java
+index 53d4018..b278664 100644
+--- a/services/core/java/com/android/server/am/ActivityManagerService.java
++++ b/services/core/java/com/android/server/am/ActivityManagerService.java
+@@ -23003,6 +23003,18 @@ public final class ActivityManagerService extends ActivityManagerNative
+         }
+     }
+ 
++    @Override
++    public List<String> getDynamicReceiverNames() throws RemoteException {
++        List<String> receiverNames = new ArrayList<String>();
++        for (ReceiverList r : mRegisteredReceivers.values()) {
++            String receiverName = r.receiver.getReceiverName();
++            if (receiverName != null) {
++                receiverNames.add(receiverName);
++            }
++        }
++        return receiverNames;
++    }
++
+-- 
+2.7.4
+
