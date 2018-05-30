@@ -403,7 +403,7 @@ APP来源: 小米商店 http://app.mi.com/
 (注：其它错误大多为 java.lang.UnsatisfiedLinkError 错误，为应用不兼容系统导致)
 
 
-### 以应用为维度 (TOP10)
+### 以应用为维度
 
 |序号|应用包名|出现异常次数|
 |---|---|---|
@@ -431,10 +431,10 @@ APP来源: 小米商店 http://app.mi.com/
 
 ### 对比其它测试应用 (功能维度)
 
-|应用|Activity|Service|静态Receiver|动态Receiver|Provider|批量测试|
+|应用|Activity|Service|静态Receiver|动态Receiver|Provider|批量测试|多种模糊Intent|
 |---|---|----|----|---|---|---|---|
-|IntentFuzzer|√|√|√|×|×|×|
-|IntentFuzzer加强|√|√|√|√|√|√|
+|IntentFuzzer|√|√|√|×|×|×|×|
+|IntentFuzzer加强|√|√|√|√|√|√|√|
 
 
 License
