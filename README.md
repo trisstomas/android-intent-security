@@ -48,6 +48,14 @@ For a single component, just click an item listed. While click the "Null Fuzz Al
 * DBHelper: 用于异常数据持久化
 * FuzzIntentFactory: 用于生成测试用的 fuzz intent
 
+### 时序图
+
+![](SequenceDiagram1.jpg)
+
+### 架构图
+![](arch.jpg)
+
+
 ## 1. 组件信息收集
 
 - [x] PMS.getInstalledPackages
