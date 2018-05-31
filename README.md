@@ -326,6 +326,23 @@ index d752e52..2343c98 100644
 	}
 ```
 
+### 附-如何编译AOSP并使修改代码生效
+
+官方教程：
+
+[https://source.android.com/setup/build/downloading](https://source.android.com/setup/build/downloading)
+
+1. 配置编译环境，下载repo
+2. mkdir aosp_source
+3. cd aosp_source
+4. repo init -u https://android.googlesource.com/platform/manifest -b android-7.0.1_r1 # 拉取7.0代码分支
+5. repo sync # 使用repo进行源码下载
+6. cd frameworks/base # 进入被修改代码目录
+7. git apply --stat 0001-add-getDynamicReceiverNames-in-AMS-for-fuzz-intent-t.patch # 讲patch修改应用到该项目中
+8. source build/envsetup.sh
+9. lunch # 编译机型信息初始化
+10. make -j12 # 进行编译
+11. 编译成功后，进入fastboot刷机，重启手机后修改会生效
 
 ## 数据来源
 
@@ -395,10 +412,7 @@ APP来源: 小米商店 http://app.mi.com/
 |9|android.database.sqlite.SQLiteReadOnlyDatabaseException|9|
 |10|java.lang.VerifyError|6|
 |11|java.lang.NoSuchFieldError|5|
-|12|android.database.sqlite.SQLiteCantOpenDatabaseException|3|
-|13|java.lang.OutOfMemoryError|3|
-|14|android.database.sqlite.SQLiteReadOnlyDatabaseException|3|
-|15|其它|37|
+|12|其它|46|
 
 (注：其它错误大多为 java.lang.UnsatisfiedLinkError 错误，为应用不兼容系统导致)
 
