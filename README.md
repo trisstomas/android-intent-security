@@ -397,37 +397,37 @@ APP来源: 小米商店 http://app.mi.com/
 |17|com.tongzhuo.tongzhuogame|同桌游戏|聊天社交|
 |18|com.xunlei.downloadprovider|迅雷|影音视听|
 |19|com.netease.cloudmusic|网易云音乐|影音视听|
-|20|com.hunantv.imgo.activity|芒果TV|影音视听|
+|20|com.tudou.android|土豆视频|影音视听|
 |21|com.tencent.karaoke|全民K歌|影音视听|
 |22|com.tencent.qqmusic|QQ音乐|影音视听|
 |23|com.youku.phone|优酷-2018世界杯|影音视听|
 |24|air.tv.douyu.android|斗鱼直播|影音视听|
 |25|tv.danmaku.bili|哔哩哔哩|影音视听|
-|26|com.ss.android.article.video|西瓜视频|影音视听|
+|26|com.cmplay.tiles2_cn.mi|钢琴块2|影音视听|
 |27|com.tencent.qqlive|腾讯视频|影音视听|
 |28|com.kugou.android|酷狗音乐|影音视听|
 |29|com.qiyi.video|爱奇艺|影音视听|
 |30|com.duowan.kiwi|虎牙直播|影音视听|
 |31|tv.yixia.bobo|波波视频|影音视听|
 |32|com.cmcc.cmvideo|咪咕视频|影音视听|
-|33|com.le123.ysdq|影视大全|影音视听|
+|33|com.changba|唱吧|影音视听|
 |34|com.UCMobile|UC浏览器|实用工具|
 |35|com.eg.android.AlipayGphone|支付宝|实用工具|
 |36|com.snda.wifilocating|WiFi万能钥匙|实用工具|
 |37|com.tencent.mtt|QQ浏览器-送王卡|实用工具|
 |38|com.baidu.netdisk|百度网盘|实用工具|
-|39|com.zhaopin.social|智联招聘|实用工具|
+|39|com.tencent.wifimanager|腾讯WiFi管家|实用工具|
 |40|com.slkj.paotui.customer|UU跑腿|实用工具|
 |41|com.duokan.phone.remotecontroller|万能遥控|实用工具|
-|42|com.greenpoint.android.mc10086.activity|中国移动|实用工具|
+|42|com.picsart.studio|PicsArt|实用工具|
 |43|com.job.android|前程无忧51Job|实用工具|
 |44|com.sh.cm.busihall|上海移动|实用工具|
 |45|com.iflytek.inputmethod|讯飞输入法|实用工具|
 |46|com.hpbr.bosszhipin|Boss直聘|实用工具|
 |47|com.alibaba.android.rimet|钉钉|效率办公|
 |48|com.tencent.wework|企业微信|效率办公|
-|49|com.intsig.camscanner|扫描全能王|效率办公|
-|50|cn.wps.moffice_eng|WPS Office|效率办公|
+|49|com.intsig.camscanner|Microsoft Word|效率办公|
+|50|com.microsoft.office.word|WPS Office|效率办公|
 |51|com.tencent.androidqqmail|QQ邮箱|效率办公|
 |52|com.gstarmc.android|CAD手机看图|效率办公|
 |53|com.netease.mobimail|网易邮箱|效率办公|
@@ -475,7 +475,7 @@ APP来源: 小米商店 http://app.mi.com/
 |95|ren.qiutu.app|原力囚徒健身|体育运动|
 |96|com.jiajiayunfu.fitness|15健身|体育运动|
 |97|com.v.study|互动作业-作业答案|学习教育|
-|98|com.kuaiduizuoye.scan|快对作业|学习教育|
+|98|com.xueersi.parentsmeeting|学而思网校|学习教育|
 |99|com.fenbi.android.solar|小猿搜题|学习教育|
 |100|com.baidu.homework|作业帮-学习辅导|学习教育|
 
